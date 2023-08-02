@@ -1,0 +1,41 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 1.5.4"
+    }
+  }
+}
+
+provider "aws" {
+  region     = "us-east-1"
+  access_key = "ASIAUMD25XDLCXESO2YP"
+  secret_key = "zdZ6bCtqOQd7c6wVpjt8Q4FLLrtjMM8FiiKB1xpY"
+}
+
+resource "tls_private_key" "rsa_4096" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+variable "key_name" {}
+
+resource "aws_key_pair" "EC2key-pair" {
+  key_name   = var.key_name
+  public_key = tls_private_key.rsa_4096.public_key_openssh
+}
+resource "local_file" "private_key" {
+  content  = tls_private_key.rsa_4096.private_key_pem
+  filename = var.EC2Key-pair
+}
+
+
+resource "aws_instance" "public instance" {
+  ami           = "ami-053b0d53c279acc90"
+  instance_type = "t2.micro"
+  key_name = aws_key_pair.EC2Key-pair
+
+  tags = {
+    Name = "public_instance"
+  }
+}
